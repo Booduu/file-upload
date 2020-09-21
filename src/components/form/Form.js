@@ -8,6 +8,7 @@ import Box from '@material-ui/core/Box';
 
 const FirebaseFileUpload = () => {
 
+
     const [image, setImage] = useState(null);
     const [ url, setUrl ] = useState("");
     const [ progress, setProgress ] = useState(0);
@@ -16,6 +17,7 @@ const FirebaseFileUpload = () => {
     const handleChange= (e) => {
         if(e.target.files[0]) {
             setImage(e.target.files[0]);
+            console.log(e.target.files[0])
             setdisabledButton(false)
         }
     }
