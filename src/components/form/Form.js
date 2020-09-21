@@ -50,7 +50,6 @@ const FirebaseFileUpload = () => {
             { url && (
                 <img src={ url } width="200px"/>
             ) }
-            
         </div>
     )
 }
