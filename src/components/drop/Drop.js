@@ -31,7 +31,7 @@ const rejectStyle = {
   borderColor: '#ff1744'
 };
 
-function StyledDropzone(props) {
+function Drop(props) {
 
   const [ url, setUrl ] = useState("");
 
@@ -100,4 +100,4 @@ const handleUpload = (file) => {
   );
 }
 
-export default StyledDropzone;
+export default Drop;

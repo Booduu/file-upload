@@ -1,11 +1,11 @@
 import React from 'react';
-import { Basic } from './components';
+import { Drop } from './components';
 import './App.css';
 
 function App() {
   return (
     <div className="App">
-      <Basic />
+      <Drop />
     </div>
   );
 }
