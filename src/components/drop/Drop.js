@@ -1,6 +1,13 @@
 import React, {useMemo, useState} from 'react';
 import {useDropzone} from 'react-dropzone';
 import { storage } from '../../conf/firebaseApi';
+import { makeStyles } from '@material-ui/core/styles';
+import Paper from '@material-ui/core/paper';
+import Typography from '@material-ui/core/Typography';
+import CardMedia from '@material-ui/core/CardMedia';
+import Button from '@material-ui/core/Button';
+
+
 
 
 const baseStyle = {
@@ -31,9 +38,41 @@ const rejectStyle = {
   borderColor: '#ff1744'
 };
 
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    '& > *': {
+      margin: theme.spacing(1),
+    },
+  },
+  paper: {
+    width: '300px',
+    height: '400px',
+    display: "flex",
+    flexDirection: 'column',
+    flex: '2 2 1'
+  },
+  cardimage: {
+    width: '100%',
+    minHeight: '400px'
+  },
+  cardInfo: {
+
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center'
+  }
+}));
+
+
+
 function Drop(props) {
 
   const [ url, setUrl ] = useState("");
+  const [ loaded, setLoaded ] = useState(false);
 
   const {
     getRootProps,
@@ -55,16 +94,43 @@ function Drop(props) {
     isDragAccept
   ]);
 
+  const classes = useStyles();
+
   const files = acceptedFiles.map(file => {
+
+    const objectUrl = URL.createObjectURL(file);
+    
     return (
-    <li key={file.path}>
-      <span>{file.path} - {file.size} bytes</span>
-      <button onClick={() => handleUpload(file) }>Upload</button>
-    </li>
+        <Paper key={file.path} className={classes.paper} elevation={3}>
+          <CardMedia
+            image={ objectUrl }
+            title="upload preview"
+            className={classes.cardimage}
+          />
+          <div className={classes.cardInfo}>
+            <Typography>  {file.path} </Typography>
+            <Typography>  {file.size} bytes</Typography>
+            <Button onClick={() => handleUpload(file) } variant="contained" color="primary" className={classes.button}>Upload</Button>
+          </div>
+          
+        </Paper>
   )});
+
+  const successLoaded = () => {
+    console.log(loaded);
+    return (
+        <div>
+          <Typography  variant="h4" color="inherit">Upload success </Typography>
+          <Typography  variant="h6" color="inherit">your url :</Typography>
+          <Typography  variant="overline" color="inherit" paragraph>{url}</Typography>
+          <Button onClick={() => {setLoaded(false); setUrl('')} } variant="contained" color="primary" className={classes.button}>Back</Button>
+        </div>
+    )
+  }
 
 
 const handleUpload = (file) => {
+  
     const upload = storage.ref(`images/${file.name}`).put(file);
 
     upload.on(
@@ -80,11 +146,13 @@ const handleUpload = (file) => {
                 .getDownloadURL()
                 .then(url => {
                     setUrl(url)
-                    console.log(file)
+                    setLoaded(true) 
                 })
         }
     )
 }
+
+
 
   return (
     <div className="container">
@@ -93,9 +161,15 @@ const handleUpload = (file) => {
         <p>Drag 'n' drop some files here, or click to select files</p>
       </div>
       <aside>
-        <h4>Files</h4>
-        <ul>{files}</ul>
+        
       </aside>
+      <div className={classes.root}>
+        { !loaded  ? files : (
+          successLoaded()
+        )}
+
+  
+      </div>
     </div>
   );
 }
