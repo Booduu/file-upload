@@ -70,105 +70,105 @@ const useStyles = makeStyles((theme) => ({
 
 
 function Drop(props) {
+    const [ image, setImage ] = useState();
+    const [ url, setUrl ] = useState("");
+    const [ loaded, setLoaded ] = useState(false);
 
-  const [ url, setUrl ] = useState("");
-  const [ loaded, setLoaded ] = useState(false);
+    const {
+      getRootProps,
+      getInputProps,
+      isDragActive,
+      isDragAccept,
+      isDragReject,
+      acceptedFiles
+    } = useDropzone({accept: 'image/*'});
 
-  const {
-    getRootProps,
-    getInputProps,
-    isDragActive,
-    isDragAccept,
-    isDragReject,
-    acceptedFiles
-  } = useDropzone({accept: 'image/*'});
+    const style = useMemo(() => ({
+      ...baseStyle,
+      ...(isDragActive ? activeStyle : {}),
+      ...(isDragAccept ? acceptStyle : {}),
+      ...(isDragReject ? rejectStyle : {})
+    }), [
+      isDragActive,
+      isDragReject,
+      isDragAccept
+    ]);
 
-  const style = useMemo(() => ({
-    ...baseStyle,
-    ...(isDragActive ? activeStyle : {}),
-    ...(isDragAccept ? acceptStyle : {}),
-    ...(isDragReject ? rejectStyle : {})
-  }), [
-    isDragActive,
-    isDragReject,
-    isDragAccept
-  ]);
+    const classes = useStyles();
 
-  const classes = useStyles();
+    const files = acceptedFiles.map(file => {
 
-  const files = acceptedFiles.map(file => {
+      const objectUrl = URL.createObjectURL(file);
+      
+      return (
+          <Paper key={file.path} className={classes.paper} elevation={3}>
+            <CardMedia
+              image={ objectUrl }
+              title="upload preview"
+              className={classes.cardimage}
+            />
+            <div className={classes.cardInfo}>
+              <Typography>  {file.path} </Typography>
+              <Typography>  {file.size} bytes</Typography>
+              <Button onClick={() => handleUpload(file) } variant="contained" color="primary" className={classes.button}>Upload</Button>
+            </div>
+            
+          </Paper>
+    )});
 
-    const objectUrl = URL.createObjectURL(file);
-    
-    return (
-        <Paper key={file.path} className={classes.paper} elevation={3}>
-          <CardMedia
-            image={ objectUrl }
-            title="upload preview"
-            className={classes.cardimage}
-          />
-          <div className={classes.cardInfo}>
-            <Typography>  {file.path} </Typography>
-            <Typography>  {file.size} bytes</Typography>
-            <Button onClick={() => handleUpload(file) } variant="contained" color="primary" className={classes.button}>Upload</Button>
+    const successLoaded = () => {
+      return (
+          <div>
+            <Typography  variant="h4" color="inherit">Upload success </Typography>
+            <Typography  variant="h6" color="inherit">your url :</Typography>
+            <Typography  variant="overline" color="inherit" paragraph>{url}</Typography>
+            <Button onClick={() => { setLoaded(false); setUrl('') } } variant="contained" color="primary" className={classes.button}>Back</Button>
           </div>
-          
-        </Paper>
-  )});
+      )
+    }
 
-  const successLoaded = () => {
-    console.log(loaded);
-    return (
-        <div>
-          <Typography  variant="h4" color="inherit">Upload success </Typography>
-          <Typography  variant="h6" color="inherit">your url :</Typography>
-          <Typography  variant="overline" color="inherit" paragraph>{url}</Typography>
-          <Button onClick={() => {setLoaded(false); setUrl('')} } variant="contained" color="primary" className={classes.button}>Back</Button>
+
+    const handleUpload = (file) => {
+      
+        const upload = storage.ref(`images/${file.name}`).put(file);
+
+        upload.on(
+            "state_changed",
+            snapshot => {},
+            error => {
+              console.log(error);
+            },
+            () => {
+                storage
+                    .ref('images')
+                    .child(file.name)
+                    .getDownloadURL()
+                    .then(url => {
+                        setUrl(url)
+                        setLoaded(true) 
+                    })
+            }
+        )
+    }
+
+    const zoneDrag = () => {
+      return (
+        <div {...getRootProps({style})}>
+          <input {...getInputProps()} />
+          <p>Drag 'n' drop some files here, or click to select files</p>
         </div>
-    )
-  }
+      )
+    }
 
 
-const handleUpload = (file) => {
-  
-    const upload = storage.ref(`images/${file.name}`).put(file);
-
-    upload.on(
-        "state_changed",
-        snapshot => {},
-        error => {
-          console.log(error);
-        },
-        () => {
-            storage
-                .ref('images')
-                .child(file.name)
-                .getDownloadURL()
-                .then(url => {
-                    setUrl(url)
-                    setLoaded(true) 
-                })
-        }
-    )
-}
-
-
-
+//finally
   return (
     <div className="container">
-      <div {...getRootProps({style})}>
-        <input {...getInputProps()} />
-        <p>Drag 'n' drop some files here, or click to select files</p>
-      </div>
-      <aside>
-        
-      </aside>
+     { zoneDrag() }
       <div className={classes.root}>
         { !loaded  ? files : (
           successLoaded()
         )}
-
-  
       </div>
     </div>
   );
