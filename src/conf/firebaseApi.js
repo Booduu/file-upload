@@ -9,7 +9,7 @@ const firebaseConfig = {
     databaseURL: "https://upload-db9bd.firebaseio.com",
     projectId: "upload-db9bd",
     storageBucket: "upload-db9bd.appspot.com",
-    messagingSenderId: "354225422448",
+    messagingSenderId: "<messagingSenderId>",
     appId: "<apiid>",
     measurementId: "<measurementId>"
   };
